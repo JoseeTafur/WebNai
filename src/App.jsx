@@ -4,12 +4,13 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
 import ProductCard from './components/ProductCard';
+import ProductDetailView from './components/ProductDetailView';
 import Faq from './components/Faq';
 import CustomizerModal from './components/CustomizerModal';
 import CartDrawer from './components/CartDrawer';
 import Footer from './components/Footer';
 
-// Nuevos componentes modulares del administrador
+// Componentes modulares del administrador
 import AdminLoginModal from './components/admin/AdminLoginModal';
 import AdminLayout from './components/admin/AdminLayout';
 
@@ -20,11 +21,18 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [selectedProductForCustom, setSelectedProductForCustom] = useState(null);
+  const [selectedProductDetail, setSelectedProductDetail] = useState(null);
 
   // Estado dinámico del catálogo y del administrador
   const [productsList, setProductsList] = useState(PRODUCTS);
   const [adminLoginOpen, setAdminLoginOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  const [categoriesList] = useState([
+    { id: 'cuadros-led', name: 'Cuadros LED', tagline: 'Luz cálida, madera de pino y tu recuerdo favorito grabado a láser.', isActive: true },
+    { id: 'imantados', name: 'Imantados', tagline: 'Tus fotos favoritas, siempre a la vista en la refri.', isActive: true },
+    { id: 'packs', name: 'Packs de Regalo', tagline: 'Regalos completos, listos para emocionar a quien más quieres.', isActive: true }
+  ]);
 
   // Configuración global editable desde SettingsView
   const [storeConfig, setStoreConfig] = useState({
@@ -71,7 +79,6 @@ export default function App() {
     setCartOpen(true);
   };
 
-  // Filtrado que omite productos inactivos (soft delete) en la vista pública
   const activeProducts = productsList.filter(p => p.isActive !== false);
   const filteredProducts = selectedCategory === 'all' 
     ? activeProducts 
@@ -90,26 +97,71 @@ export default function App() {
     );
   }
 
-  const [categoriesList, setCategoriesList] = useState([
-  { id: 'cuadros-led', name: 'Cuadros LED', tagline: 'Luz cálida, madera de pino y tu recuerdo favorito grabado a láser.', isActive: true },
-  { id: 'imantados', name: 'Imantados', tagline: 'Tus fotos favoritas, siempre a la vista en la refri.', isActive: true },
-  { id: 'packs', name: 'Packs de Regalo', tagline: 'Regalos completos, listos para emocionar a quien más quieres.', isActive: true }
-]);
+  // VISTA DE DETALLE DE PRODUCTO
+  if (selectedProductDetail) {
+    return (
+      <div className="min-h-screen bg-[#FDFBF7] text-[#2C3531] font-sans">
+        <Navbar 
+          cartCount={cart.length} 
+          wishlistCount={wishlist.length}
+          onOpenCart={() => setCartOpen(true)}
+          selectedCategory={selectedCategory}
+          onSelectCategory={(cat) => {
+            setSelectedCategory(cat);
+            setSelectedProductDetail(null);
+          }}
+          onOpenAdminLogin={() => setAdminLoginOpen(true)}
+          announcementText={storeConfig.announcementText}
+          products={activeProducts}
+          categories={categoriesList}
+          onSelectProduct={(p) => setSelectedProductDetail(p)}
+        />
 
-  // VISTA PÚBLICA
+        <ProductDetailView 
+          product={selectedProductDetail}
+          onBack={() => setSelectedProductDetail(null)}
+          onNavigateHome={() => setSelectedProductDetail(null)}
+          onAddToCart={handleAddToCart}
+          onOpenCustomizer={(p) => {
+            setSelectedProductForCustom(p);
+            setCustomizerOpen(true);
+          }}
+        />
+
+        <Footer config={storeConfig} />
+
+        <CustomizerModal 
+          product={selectedProductForCustom}
+          isOpen={customizerOpen}
+          onClose={() => setCustomizerOpen(false)}
+          onConfirm={handleAddToCart}
+        />
+
+        <CartDrawer 
+          isOpen={cartOpen}
+          onClose={() => setCartOpen(false)}
+          cart={cart}
+          onRemoveItem={(index) => setCart(prev => prev.filter((_, i) => i !== index))}
+        />
+      </div>
+    );
+  }
+
+  // VISTA PÚBLICA PRINCIPAL
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#2C3531] font-sans">
       <Navbar 
-  cartCount={cart.length} 
-  wishlistCount={wishlist.length}
-  onOpenCart={() => setCartOpen(true)}
-  selectedCategory={selectedCategory}
-  onSelectCategory={setSelectedCategory}
-  onOpenAdminLogin={() => setAdminLoginOpen(true)}
-  announcementText={storeConfig.announcementText}
-  products={activeProducts}
-  categories={categoriesList}
-/>
+        cartCount={cart.length} 
+        wishlistCount={wishlist.length}
+        onOpenCart={() => setCartOpen(true)}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        onOpenAdminLogin={() => setAdminLoginOpen(true)}
+        announcementText={storeConfig.announcementText}
+        products={activeProducts}
+        categories={categoriesList}
+        onSelectProduct={(p) => setSelectedProductDetail(p)}
+      />
 
       <div className="reveal">
         <Hero 
@@ -148,9 +200,9 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setSelectedCategory(tab.id)}
-                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   selectedCategory === tab.id
-                    ? 'bg-[#2D4A3E] text-white shadow-sm'
+                    ? 'bg-[#2D4A3E] text-white shadow-xs'
                     : 'bg-white border border-[#D5E2D3] text-[#4A5D52] hover:bg-[#EBF2EA]'
                 }`}
               >
@@ -168,6 +220,7 @@ export default function App() {
               isLiked={wishlist.includes(product.id)}
               onToggleLike={toggleWishlist}
               onAddToCart={handleAddToCart}
+              onClickProduct={(p) => setSelectedProductDetail(p)}
               onOpenCustomizer={(p) => {
                 setSelectedProductForCustom(p);
                 setCustomizerOpen(true);

@@ -15,7 +15,8 @@ export default function Navbar({
     { id: 'cuadros-led', name: 'Cuadros LED', tagline: 'Luz cálida, madera de pino y tu recuerdo favorito grabado a láser.', isActive: true },
     { id: 'imantados', name: 'Imantados', tagline: 'Tus fotos favoritas, siempre a la vista en la refri.', isActive: true },
     { id: 'packs', name: 'Packs de Regalo', tagline: 'Regalos completos, listos para emocionar a quien más quieres.', isActive: true }
-  ]
+  ],
+  onSelectProduct
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
@@ -88,7 +89,7 @@ export default function Navbar({
             </a>
           </div>
 
-          {/* Menú Desktop con indicador interactivo de línea estilo Wolpic */}
+          {/* Menú Desktop con línea animada tipo Wolpic */}
           <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-[#243E30]">
             {activeCategories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
@@ -105,7 +106,6 @@ export default function Navbar({
                     className={`transition-transform duration-300 ${openMenu === cat.id ? 'rotate-180' : ''}`}
                   />
                   
-                  {/* Línea animada inferior */}
                   <span 
                     className={`absolute bottom-0 left-0 w-full h-[2px] bg-[#243E30] transition-transform duration-300 ease-out origin-left ${
                       isSelected ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
@@ -180,7 +180,7 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* CENEFA DE HOJAS CON MOVIMIENTO (Z-INDEX 40) */}
+      {/* CENEFA DE HOJAS FLOTANTE */}
       <div className="absolute top-[99%] left-0 w-full h-8 pointer-events-none overflow-hidden z-40">
         <div className="relative w-full h-full flex justify-between items-start opacity-95">
           <div className="flex gap-[-8px] -ml-2 transition-transform duration-100 ease-out" style={{ transform: `translateX(${scrollOffsetLeft}px)` }}>
@@ -225,7 +225,6 @@ export default function Navbar({
         <div className="bg-white border-b border-[#E3ECE1] shadow-2xl">
           <div className="max-w-7xl mx-auto px-8 py-8 flex items-start justify-between gap-12">
             
-            {/* Lista de enlaces con el mismo efecto de línea al pasar el cursor */}
             <div className="w-64 shrink-0 space-y-4">
               <h3 className="font-serif text-2xl font-bold text-[#1C3326]">
                 {currentCategoryData?.name}
@@ -235,7 +234,11 @@ export default function Navbar({
                 {panelProducts.slice(0, 5).map((product) => (
                   <li key={product.id}>
                     <button
-                      onClick={() => { onSelectCategory(lastMenuRef.current); setOpenMenu(null); }}
+                      onClick={() => { 
+                        if (onSelectProduct) onSelectProduct(product);
+                        else onSelectCategory(lastMenuRef.current);
+                        setOpenMenu(null); 
+                      }}
                       className="group relative inline-block text-left hover:text-[#2D4A3E] transition-colors cursor-pointer py-0.5"
                     >
                       <span className="truncate block max-w-[220px]">{product.name}</span>
@@ -256,12 +259,16 @@ export default function Navbar({
               </div>
             </div>
 
-            {/* Tarjetas anchas estilo Wolpic */}
+            {/* Tarjetas destacadas */}
             <div className="flex-1 grid grid-cols-4 gap-4">
               {panelProducts.slice(0, 4).map((product) => (
                 <button
                   key={product.id}
-                  onClick={() => { onSelectCategory(lastMenuRef.current); setOpenMenu(null); }}
+                  onClick={() => { 
+                    if (onSelectProduct) onSelectProduct(product);
+                    else onSelectCategory(lastMenuRef.current);
+                    setOpenMenu(null); 
+                  }}
                   className="group relative h-52 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer border border-[#E3ECE1] bg-stone-100"
                 >
                   <img
