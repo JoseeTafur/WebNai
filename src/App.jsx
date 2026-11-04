@@ -7,9 +7,11 @@ import ProductCard from './components/ProductCard';
 import Faq from './components/Faq';
 import CustomizerModal from './components/CustomizerModal';
 import CartDrawer from './components/CartDrawer';
-import AdminLogin from './components/AdminLogin';
-import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
+
+// Nuevos componentes modulares del administrador
+import AdminLoginModal from './components/admin/AdminLoginModal';
+import AdminLayout from './components/admin/AdminLayout';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -19,13 +21,25 @@ export default function App() {
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [selectedProductForCustom, setSelectedProductForCustom] = useState(null);
 
-  // Estados de catálogo dinámico y panel admin
+  // Estado dinámico del catálogo y del administrador
   const [productsList, setProductsList] = useState(PRODUCTS);
   const [adminLoginOpen, setAdminLoginOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
+  // Configuración global editable desde SettingsView
+  const [storeConfig, setStoreConfig] = useState({
+    whatsappNumber: '51933381303',
+    whatsappMessage: '¡Hola Nailu! Quisiera información sobre un regalo personalizado.',
+    freeShippingThreshold: 180,
+    announcementText: 'Envíos a todo el Perú • Regalos únicos y listos para emocionar',
+    contactEmail: 'hola@nailu.pe',
+    instagramUrl: 'https://instagram.com/nailu.pe',
+    facebookUrl: 'https://facebook.com/nailu.pe',
+    footerDescription: 'Especialistas en regalos personalizados que iluminan recuerdos.'
+  });
+
   useEffect(() => {
-    if (isAdminLoggedIn) return; // Desactiva observer de scroll en modo admin
+    if (isAdminLoggedIn) return;
 
     const observerOptions = {
       root: null,
@@ -57,24 +71,26 @@ export default function App() {
     setCartOpen(true);
   };
 
+  // Filtrado que omite productos inactivos (soft delete) en la vista pública
+  const activeProducts = productsList.filter(p => p.isActive !== false);
   const filteredProducts = selectedCategory === 'all' 
-    ? productsList 
-    : productsList.filter(p => p.category === selectedCategory);
+    ? activeProducts 
+    : activeProducts.filter(p => p.category === selectedCategory);
 
-  // VISTA INDEPENDIENTE DE ADMINISTRADOR (Si inició sesión, oculta la tienda pública)
+  // VISTA COMPLETA DE ADMINISTRADOR
   if (isAdminLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] p-4 sm:p-8 font-sans">
-        <AdminDashboard 
-          products={productsList}
-          onUpdateProducts={setProductsList}
-          onLogout={() => setIsAdminLoggedIn(false)}
-        />
-      </div>
+      <AdminLayout 
+        products={productsList}
+        onUpdateProducts={setProductsList}
+        onLogout={() => setIsAdminLoggedIn(false)}
+        storeConfig={storeConfig}
+        onUpdateConfig={setStoreConfig}
+      />
     );
   }
 
-  // VISTA PÚBLICA / LANDING STORE
+  // VISTA PÚBLICA
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#2C3531] font-sans">
       <Navbar 
@@ -84,12 +100,14 @@ export default function App() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         onOpenAdminLogin={() => setAdminLoginOpen(true)}
+        announcementText={storeConfig.announcementText}
+        products={activeProducts}
       />
 
       <div className="reveal">
         <Hero 
           onOpenCustomizer={() => {
-            setSelectedProductForCustom(productsList[0]);
+            setSelectedProductForCustom(activeProducts[0]);
             setCustomizerOpen(true);
           }}
           onExploreClick={() => {
@@ -157,11 +175,11 @@ export default function App() {
       </div>
 
       <div className="reveal">
-        <Footer />
+        <Footer config={storeConfig} />
       </div>
 
-      {/* Modales */}
-      <AdminLogin 
+      {/* Modal de Autenticación */}
+      <AdminLoginModal 
         isOpen={adminLoginOpen}
         onClose={() => setAdminLoginOpen(false)}
         onLoginSuccess={() => setIsAdminLoggedIn(true)}

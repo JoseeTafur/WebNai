@@ -16,15 +16,25 @@ const TAGLINES = {
   packs: 'Regalos completos, listos para emocionar a quien más quieres.',
 };
 
-export default function Navbar({ cartCount = 0, wishlistCount = 0, onOpenCart, onSelectCategory, selectedCategory, onOpenAdminLogin }) {
+export default function Navbar({ 
+  cartCount = 0, 
+  wishlistCount = 0, 
+  onOpenCart, 
+  onSelectCategory, 
+  selectedCategory, 
+  onOpenAdminLogin,
+  announcementText = "Envíos a todo el Perú • Regalos únicos y listos para emocionar",
+  products = PRODUCTS
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [openMenu, setOpenMenu] = useState(null);
 
-  // Mantiene el último contenido mientras el panel se desvanece (evita que se vacíe de golpe)
   const lastMenuRef = useRef(MENU_CATEGORIES[0].key);
   if (openMenu) lastMenuRef.current = openMenu;
-  const panelProducts = PRODUCTS.filter((p) => p.category === lastMenuRef.current);
+  
+  // Usamos el listado dinámico recibido
+  const panelProducts = products.filter((p) => p.category === lastMenuRef.current);
 
   // Escuchar el scroll de la ventana para mover ligeramente las hojas
   useEffect(() => {
@@ -69,10 +79,10 @@ export default function Navbar({ cartCount = 0, wishlistCount = 0, onOpenCart, o
 
       {/* Barra superior de anuncios */}
       <div className="bg-[#2D4A3E] text-[#E8F0E6] text-xs py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-2">
-        <Sparkles size={14} className="text-[#E0C097] animate-pulse" />
-        <span>Envíos a todo el Perú • Regalos únicos y listos para emocionar</span>
-        <Sparkles size={14} className="text-[#E0C097] animate-pulse" />
-      </div>
+  <Sparkles size={14} className="text-[#E0C097] animate-pulse" />
+  <span>{announcementText}</span>
+  <Sparkles size={14} className="text-[#E0C097] animate-pulse" />
+</div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
