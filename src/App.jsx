@@ -90,19 +90,26 @@ export default function App() {
     );
   }
 
+  const [categoriesList, setCategoriesList] = useState([
+  { id: 'cuadros-led', name: 'Cuadros LED', tagline: 'Luz cálida, madera de pino y tu recuerdo favorito grabado a láser.', isActive: true },
+  { id: 'imantados', name: 'Imantados', tagline: 'Tus fotos favoritas, siempre a la vista en la refri.', isActive: true },
+  { id: 'packs', name: 'Packs de Regalo', tagline: 'Regalos completos, listos para emocionar a quien más quieres.', isActive: true }
+]);
+
   // VISTA PÚBLICA
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#2C3531] font-sans">
       <Navbar 
-        cartCount={cart.length} 
-        wishlistCount={wishlist.length}
-        onOpenCart={() => setCartOpen(true)}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        onOpenAdminLogin={() => setAdminLoginOpen(true)}
-        announcementText={storeConfig.announcementText}
-        products={activeProducts}
-      />
+  cartCount={cart.length} 
+  wishlistCount={wishlist.length}
+  onOpenCart={() => setCartOpen(true)}
+  selectedCategory={selectedCategory}
+  onSelectCategory={setSelectedCategory}
+  onOpenAdminLogin={() => setAdminLoginOpen(true)}
+  announcementText={storeConfig.announcementText}
+  products={activeProducts}
+  categories={categoriesList}
+/>
 
       <div className="reveal">
         <Hero 
